@@ -1,5 +1,7 @@
 import { GetStaticProps } from 'next';
+import Link from 'next/link';
 import { FiCalendar, FiUser } from 'react-icons/fi';
+import Header from '../components/Header';
 
 import { getPrismicClient } from '../services/prismic';
 
@@ -28,9 +30,7 @@ interface HomeProps {
 export default function Home(): JSX.Element {
   return (
     <>
-      <header className={styles.headerContainer}>
-        <img src="/logo.svg" alt="logo" />
-      </header>
+      <Header />
       <main className={styles.mainContainer}>
         <a href="/" className={styles.postCard}>
           <h2>Como utitlizar Hooks</h2>
