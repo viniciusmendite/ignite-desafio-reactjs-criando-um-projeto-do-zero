@@ -1,1 +1,58 @@
-// TODO
+.headerContainer {
+  width: 100%;
+  max-width: 992px;
+  margin: 0 auto;
+  padding-top: 5rem;
+}
+
+.mainContainer {
+  width: 100%;
+  max-width: 992px;
+  margin: 0 auto;
+  padding-top: 4rem;
+
+  .postCard {
+    display: block;
+
+    & + a {
+      margin-top: 3rem;
+    }
+
+    &:hover {
+      h2 {
+        color: var(--pink);
+      }
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      transition: color .2s;
+    }
+
+    p {
+      font-size: 1.125rem;
+      color: var(--gray-100);
+      margin-top: 0.5rem;
+    }
+
+    .infoContainer {
+      margin-top: 1.5rem;
+      display: flex;
+
+      span {
+        display: flex;
+        font-size: 0.875rem;
+        color: var(--gray-200);
+
+        > svg {
+          margin-right: 0.5rem;
+        }
+
+        & + span {
+          margin-left: 1.5rem;
+        }
+      }
+    }
+  }
+}
