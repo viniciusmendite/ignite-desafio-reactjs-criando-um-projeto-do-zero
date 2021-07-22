@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { useState } from 'react';
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import { FiCalendar, FiUser } from 'react-icons/fi';
+import Prismic from '@prismicio/client';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 import Header from '../components/Header';
 
 import { getPrismicClient } from '../services/prismic';
@@ -27,49 +32,87 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home(): JSX.Element {
+export default function Home({ postsPagination }: HomeProps): JSX.Element {
+  const [nextPage, setNextPage] = useState(postsPagination.next_page);
+  const [postsLoaded, setPostsLoaded] = useState(postsPagination.results);
+
+  async function handleLoadMore() {
+    const response = await fetch(nextPage);
+    const responseParsed = await response.json();
+
+    setNextPage(responseParsed.next_page);
+    setPostsLoaded(postsLoaded.concat(responseParsed.results));
+  }
+
   return (
     <>
       <Header />
       <main className={styles.mainContainer}>
-        <a href="/" className={styles.postCard}>
-          <h2>Como utitlizar Hooks</h2>
-          <p>Pensando em sincronização em vez de ciclos de vida.</p>
+        {postsLoaded.map(post => (
+          <Link key={post.uid} href={`/post/${post.uid}`}>
+            <a className={styles.postCard}>
+              <h2>{post.data.title}</h2>
+              <p>{post.data.subtitle}</p>
 
-          <div className={styles.infoContainer}>
-            <span>
-              <FiCalendar size={20} />
-              15 Mar 2021
-            </span>
-            <span>
-              <FiUser size={20} />
-              Vinícius Mendite
-            </span>
-          </div>
-        </a>
-        <a href="/" className={styles.postCard}>
-          <h2>Como utitlizar Hooks</h2>
-          <p>Pensando em sincronização em vez de ciclos de vida.</p>
+              <div className={styles.infoContainer}>
+                <span>
+                  <FiCalendar size={20} />
+                  {format(
+                    new Date(post.first_publication_date),
+                    'dd MMM yyyy',
+                    {
+                      locale: ptBR,
+                    }
+                  )}
+                </span>
+                <span>
+                  <FiUser size={20} />
+                  {post.data.author}
+                </span>
+              </div>
+            </a>
+          </Link>
+        ))}
 
-          <div className={styles.infoContainer}>
-            <span>
-              <FiCalendar size={20} />
-              15 Mar 2021
-            </span>
-            <span>
-              <FiUser size={20} />
-              Vinícius Mendite
-            </span>
-          </div>
-        </a>
+        {nextPage && (
+          <button type="button" onClick={handleLoadMore}>
+            Carregar mais posts
+          </button>
+        )}
       </main>
     </>
   );
 }
 
-// export const getStaticProps = async () => {
-//   // const prismic = getPrismicClient();
-//   // const postsResponse = await prismic.query(TODO);
+export const getStaticProps: GetStaticProps = async () => {
+  const prismic = getPrismicClient();
+  const postsResponse = await prismic.query(
+    Prismic.Predicates.at('document.type', 'posts'),
+    {
+      pageSize: 1,
+    }
+  );
 
-//   // TODO
-// };
+  const posts = postsResponse.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: post.first_publication_date,
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      },
+    };
+  });
+
+  console.log(postsResponse);
+
+  return {
+    props: {
+      postsPagination: {
+        next_page: postsResponse.next_page,
+        results: posts,
+      },
+    },
+  };
+};
