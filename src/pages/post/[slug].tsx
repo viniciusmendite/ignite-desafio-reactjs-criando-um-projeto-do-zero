@@ -1,5 +1,6 @@
 /* eslint-disable prefer-const */
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect } from 'react';
+import Link from 'next/link';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import Prismic from '@prismicio/client';
@@ -16,6 +17,7 @@ import styles from './post.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -40,7 +42,7 @@ export default function Post({ post }: PostProps): JSX.Element {
 
   useEffect(() => {
     let script = document.createElement('script');
-    let anchor = document.getElementById('inject-comments-for-uterances');
+    let anchor = document.getElementById('inject-comments-for-utterances');
     script.setAttribute('src', 'https://utteranc.es/client.js');
     script.setAttribute('crossorigin', 'anonymous');
     script.setAttribute('async', 'true');
@@ -91,6 +93,15 @@ export default function Post({ post }: PostProps): JSX.Element {
               {time * 4} min
             </span>
           </div>
+          <span className={styles.lastPublication}>
+            {format(
+              new Date(post.last_publication_date),
+              "'*editado em' dd MMM yyyy', às' kk:mm",
+              {
+                locale: ptBR,
+              }
+            )}
+          </span>
 
           {post.data.content.map(c => (
             <div key={c.heading}>
@@ -112,7 +123,22 @@ export default function Post({ post }: PostProps): JSX.Element {
             }}
           /> */}
         </div>
-        <div id="inject-comments-for-uterances" />
+        <hr className={styles.divisor} />
+        <div className={styles.actions}>
+          <Link href="">
+            <a>
+              <span>Como utilizar Hooks</span>
+              Post anterior
+            </a>
+          </Link>
+          <Link href="">
+            <a>
+              <span>Criando um app CRA do Zero</span>
+              Próximo post
+            </a>
+          </Link>
+        </div>
+        <div id="inject-comments-for-utterances" />
       </main>
     </>
   );
@@ -145,6 +171,7 @@ export const getStaticProps: GetStaticProps = async context => {
   const post = {
     uid: response.uid,
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
       title: response.data.title,
       author: response.data.author,
