@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+import { useEffect, useLayoutEffect } from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import Prismic from '@prismicio/client';
@@ -35,6 +37,21 @@ interface PostProps {
 
 export default function Post({ post }: PostProps): JSX.Element {
   const router = useRouter();
+
+  useEffect(() => {
+    let script = document.createElement('script');
+    let anchor = document.getElementById('inject-comments-for-uterances');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.setAttribute('async', 'true');
+    script.setAttribute(
+      'repo',
+      'viniciusmendite/ignite-spacetraveling-utterances-app'
+    );
+    script.setAttribute('issue-term', 'pathname');
+    script.setAttribute('theme', 'photon-dark');
+    anchor.appendChild(script);
+  }, []);
 
   const time = Math.ceil(
     RichText.asText(post.data.content[0].body).split(' ').length / 200
@@ -95,6 +112,7 @@ export default function Post({ post }: PostProps): JSX.Element {
             }}
           /> */}
         </div>
+        <div id="inject-comments-for-uterances" />
       </main>
     </>
   );
